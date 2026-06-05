@@ -1,87 +1,141 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <title>제31회 환경의 날 기념행사</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <style>
-        body { font-family: 'Noto Sans KR', sans-serif; overflow-x: hidden; }
-        
-        /* 종이비행기 애니메이션 (CSS 기반으로 확실하게 작동) */
-        .paper-plane {
-            position: fixed;
-            top: 20%;
-            left: -100px;
-            font-size: 50px;
-            color: #16a34a;
-            z-index: 1;
-            animation: fly 10s linear infinite;
-        }
-        @keyframes fly {
-            0% { transform: translateX(0) translateY(0) rotate(0deg); }
-            50% { transform: translateX(50vw) translateY(100px) rotate(10deg); }
-            100% { transform: translateX(110vw) translateY(0) rotate(0deg); }
-        }
-
-        .modal { display: none; position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; padding: 20px; }
-        .modal.active { display: flex !important; }
-        .modal-content { background: white; padding: 2rem; border-radius: 1rem; width: 100%; max-width: 600px; max-height: 80vh; overflow-y: auto; }
-        #map { height: 250px; width: 100%; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>제31회 환경의 날 기념행사</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+body{font-family:'Noto Sans KR',sans-serif;background:#f8fafc}
+.hero{height:100vh;position:relative;overflow:hidden;background:linear-gradient(135deg,#14532d,#22c55e);color:#fff}
+#hero-canvas{position:absolute;inset:0}
+.hero-content{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:20px}
+.badge{background:rgba(255,255,255,.15);padding:10px 20px;border-radius:999px;margin-bottom:20px}
+.paper-plane{position:absolute;top:18%;left:-100px;animation:fly 12s linear infinite;z-index:3}
+@keyframes fly{0%{transform:translateX(0)}100%{transform:translateX(120vw)}}
+.card{background:white;border-radius:18px;padding:24px;box-shadow:0 10px 30px rgba(0,0,0,.08)}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;justify-content:center;align-items:center;padding:20px}
+.modal.active{display:flex}
+.modal-content{background:white;width:100%;max-width:1000px;max-height:90vh;overflow:auto;padding:24px;border-radius:18px}
+#map{height:420px;border-radius:18px}
+</style>
 </head>
-<body class="bg-slate-50">
+<body>
 
-    <div class="paper-plane">✈️</div>
+<header class="hero">
+<div id="hero-canvas"></div>
 
-    <div class="relative z-10">
-        <nav class="bg-white/90 backdrop-blur shadow-sm sticky top-0 z-50">
-            <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-                <h1 class="text-xl font-bold text-green-700">제31회 환경의 날</h1>
-                <div class="space-x-4 text-sm font-bold">
-                    <button onclick="document.getElementById('modal-about').classList.add('active')">행사소개</button>
-                    <button onclick="document.getElementById('modal-schedule').classList.add('active')">일정표</button>
-                    <button onclick="document.getElementById('modal-poster').classList.add('active')">홍보물</button>
-                    <button onclick="showLocation()">찾아오기</button>
-                </div>
-            </div>
-        </nav>
+<div class="paper-plane">
+<svg width="80" height="80" viewBox="0 0 40 40">
+<path d="M35 5L5 18L17 22L21 35L35 5ZM18.5 23L15.5 19.5L29 10L18.5 23Z" fill="white"/>
+</svg>
+</div>
 
-        <header class="bg-green-600/80 text-white py-20 text-center">
-            <h2 class="text-4xl font-bold mb-4">제31회 환경의 날 기념행사</h2>
-            <p>6월 7일 ~ 6월 8일 | 제주시민복지타운 광장</p>
-        </header>
+<div class="hero-content">
+<div class="badge">WORLD ENVIRONMENT DAY 2026</div>
+<h1 class="text-5xl md:text-7xl font-black mb-6">제31회 환경의 날<br>기념행사</h1>
+<p class="text-xl md:text-2xl">맨날맨날 기후행동,<br>우리 모두 가치허게!</p>
 
-        <main class="container mx-auto px-6 py-12">
-            <div class="grid md:grid-cols-2 gap-6">
-                <button onclick="document.getElementById('modal-baekil').classList.add('active')" class="bg-white p-8 rounded-xl shadow-lg border-2 border-green-500 font-bold hover:bg-green-50">청소년 환경 백일장 신청</button>
-                <button onclick="document.getElementById('modal-dotjari').classList.add('active')" class="bg-white p-8 rounded-xl shadow-lg border-2 border-green-500 font-bold hover:bg-green-50">어린이 돗자리장 예약</button>
-            </div>
-        </main>
-    </div>
+<div class="mt-8 flex gap-3 flex-wrap justify-center">
+<button onclick="openModal('about')" class="bg-white text-green-700 px-6 py-3 rounded-full font-bold">행사소개</button>
+<button onclick="openModal('schedule')" class="bg-white text-green-700 px-6 py-3 rounded-full font-bold">일정표</button>
+<button onclick="openModal('poster')" class="bg-white text-green-700 px-6 py-3 rounded-full font-bold">홍보포스터</button>
+</div>
+</div>
+</header>
 
-    <div id="modal-about" class="modal"><div class="modal-content">
-        <h2 class="text-xl font-bold mb-4 text-green-700">행사 소개</h2>
-        <div class="text-sm text-slate-700 space-y-4">
-            <p>❑ 올해 행사는 <strong>‘맨날맨날 기후행동, 우리 모두 ᄀᆞ치허게!’</strong>를 주제로 일상 속 작은 실천으로 기후위기에 대응하며 지속 가능한 미래를 함께 만들자는 뜻을 담았습니다.</p>
-            <p>❍ 세계 환경의 날 주제인 ‘기후행동을 향한 전 세계의 요청’에 맞춰 생활 속 기후행동과 자원순환 실천, 녹색소비 확산을 위한 체험 프로그램을 운영합니다.</p>
-            <p>❍ 행사는 제주도와 제주도지속가능발전협의회가 공동 주최하며, 청소년 환경 백일장과 31개 환경 체험·전시 부스가 운영됩니다.</p>
-        </div>
-        <button onclick="this.parentElement.parentElement.classList.remove('active')" class="mt-4 w-full bg-slate-800 text-white py-2 rounded">닫기</button>
-    </div></div>
+<section class="max-w-6xl mx-auto px-6 py-20">
+<h2 class="text-4xl font-bold text-center mb-12">환경을 위한 우리의 실천</h2>
+<div class="grid md:grid-cols-3 gap-6">
+<div class="card text-center"><div class="text-6xl">🌱</div><h3 class="font-bold text-xl mt-4">기후행동</h3><p>생활 속 탄소중립 실천</p></div>
+<div class="card text-center"><div class="text-6xl">♻️</div><h3 class="font-bold text-xl mt-4">자원순환</h3><p>재사용과 업사이클링</p></div>
+<div class="card text-center"><div class="text-6xl">🌎</div><h3 class="font-bold text-xl mt-4">지속가능성</h3><p>미래세대를 위한 환경보전</p></div>
+</div>
+</section>
 
-    <div id="modal-schedule" class="modal"><div class="modal-content"><img src="https://la21jeju.or.kr/data/cheditor4/2605/20260520191507_hcrwlyqn.jpg"><button onclick="this.parentElement.parentElement.classList.remove('active')" class="mt-4 w-full bg-slate-800 text-white py-2 rounded">닫기</button></div></div>
-    <div id="modal-poster" class="modal"><div class="modal-content"><img src="https://www.jeju.go.kr/files/board/f223c8c6-8a3e-4cfe-9fb3-052534b306b9.jpg"><button onclick="this.parentElement.parentElement.classList.remove('active')" class="mt-4 w-full bg-slate-800 text-white py-2 rounded">닫기</button></div></div>
-    <div id="modal-location" class="modal"><div class="modal-content"><div id="map" class="mb-4"></div><p class="text-sm"><b>자가용:</b> 제주시 연삼로 286<br><b>대중교통:</b> 도청/진흥원 인근 하차 도보 5분</p><button onclick="this.parentElement.parentElement.classList.remove('active')" class="mt-4 w-full bg-slate-800 text-white py-2 rounded">닫기</button></div></div>
-    <div id="modal-baekil" class="modal"><div class="modal-content"><h2 class="text-xl font-bold mb-4">백일장 신청</h2><input class="w-full border p-2 mb-2" placeholder="이름"><button onclick="this.parentElement.parentElement.classList.remove('active')" class="mt-4 w-full bg-green-600 text-white py-2 rounded">제출</button></div></div>
-    <div id="modal-dotjari" class="modal"><div class="modal-content"><h2 class="text-xl font-bold mb-4">돗자리장 예약</h2><input class="w-full border p-2 mb-2" placeholder="대표자명"><button onclick="this.parentElement.parentElement.classList.remove('active')" class="mt-4 w-full bg-green-600 text-white py-2 rounded">예약</button></div></div>
+<section class="max-w-6xl mx-auto px-6 py-20">
+<h2 class="text-4xl font-bold text-center mb-12">주요 프로그램</h2>
+<div class="grid md:grid-cols-2 gap-6">
+<div class="card">📝 청소년 환경 백일장</div>
+<div class="card">🧺 어린이 돗자리장</div>
+<div class="card">♻️ 환경 체험부스</div>
+<div class="card">🌳 환경 전시·홍보관</div>
+</div>
+</section>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script>
-        function showLocation() { document.getElementById('modal-location').classList.add('active'); setTimeout(() => { map.invalidateSize(); }, 200); }
-        const map = L.map('map').setView([33.4895, 126.4983], 16);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-        L.marker([33.4895, 126.4983]).addTo(map).bindPopup("시민복지타운");
-    </script>
+<section class="max-w-6xl mx-auto px-6 py-20">
+<h2 class="text-4xl font-bold text-center mb-12">참여 신청</h2>
+<div class="grid md:grid-cols-2 gap-6">
+<div class="card text-center">
+<h3 class="text-xl font-bold mb-3">청소년 환경 백일장 신청</h3>
+<input class="border p-2 w-full rounded" placeholder="이름">
+<button class="mt-3 bg-green-600 text-white px-5 py-2 rounded">신청하기</button>
+</div>
+<div class="card text-center">
+<h3 class="text-xl font-bold mb-3">어린이 돗자리장 예약</h3>
+<input class="border p-2 w-full rounded" placeholder="대표자명">
+<button class="mt-3 bg-green-600 text-white px-5 py-2 rounded">예약하기</button>
+</div>
+</div>
+</section>
+
+<section class="max-w-6xl mx-auto px-6 py-20">
+<h2 class="text-4xl font-bold text-center mb-12">행사장 위치</h2>
+<div id="map"></div>
+</section>
+
+<section class="max-w-6xl mx-auto px-6 py-20">
+<h2 class="text-4xl font-bold text-center mb-12">찾아오는 길</h2>
+<div class="grid md:grid-cols-3 gap-6">
+<div class="card"><h3 class="font-bold text-xl mb-3">🚗 자가용 이용</h3><p>내비게이션에 제주시 연삼로 286 또는 제주특별자치도 경제통상진흥원을 검색하여 방문해 주세요.</p></div>
+<div class="card"><h3 class="font-bold text-xl mb-3">🚌 대중교통 이용</h3><p>제주도청·경제통상진흥원 인근 정류장 하차 후 도보 3~5분 거리입니다.</p></div>
+<div class="card"><h3 class="font-bold text-xl mb-3">🚶 도보 이용</h3><p>제주도청 기준 도보 약 5분 거리이며 연삼로를 따라 이동하면 행사장을 쉽게 찾을 수 있습니다.</p></div>
+</div>
+</section>
+
+<footer class="bg-green-800 text-white text-center py-8">
+제31회 환경의 날 기념행사 | 제주특별자치도 · 제주특별자치도지속가능발전협의회
+</footer>
+
+<div id="about" class="modal"><div class="modal-content">
+<h2 class="text-2xl font-bold mb-4">행사 소개</h2>
+<p class="mb-4">❑ 올해 행사는 <b>‘맨날맨날 기후행동, 우리 모두 가치허게!’</b>를 주제로 일상 속 작은 실천으로 기후위기에 대응하며 지속 가능한 미래를 함께 만들자는 뜻을 담았습니다.</p>
+<p class="mb-4">❍ 세계 환경의 날 주제에 맞춰 생활 속 기후행동과 자원순환 실천, 녹색소비 확산을 위한 체험 프로그램을 운영합니다.</p>
+<p>❍ 제주특별자치도와 제주특별자치도지속가능발전협의회가 공동 주최하며 청소년 환경 백일장과 31개 환경 체험·전시 부스가 운영됩니다.</p>
+<button onclick="closeModal('about')" class="mt-5 bg-green-600 text-white px-4 py-2 rounded">닫기</button>
+</div></div>
+
+<div id="schedule" class="modal"><div class="modal-content">
+<h2 class="text-2xl font-bold mb-4">행사 일정표</h2>
+<img src="https://la21jeju.or.kr/data/cheditor4/2605/20260520191507_hcrwlyqn.jpg" class="w-full rounded-lg">
+<button onclick="closeModal('schedule')" class="mt-5 bg-green-600 text-white px-4 py-2 rounded">닫기</button>
+</div></div>
+
+<div id="poster" class="modal"><div class="modal-content">
+<h2 class="text-2xl font-bold mb-4">홍보 포스터</h2>
+<img src="https://www.jeju.go.kr/files/board/f223c8c6-8a3e-4cfe-9fb3-052534b306b9.jpg" class="w-full rounded-lg">
+<button onclick="closeModal('poster')" class="mt-5 bg-green-600 text-white px-4 py-2 rounded">닫기</button>
+</div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+function openModal(id){document.getElementById(id).classList.add('active')}
+function closeModal(id){document.getElementById(id).classList.remove('active')}
+
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight,0.1,1000);
+const renderer=new THREE.WebGLRenderer({alpha:true});
+renderer.setSize(window.innerWidth,window.innerHeight);
+document.getElementById('hero-canvas').appendChild(renderer.domElement);
+const globe=new THREE.Mesh(new THREE.IcosahedronGeometry(1,1),new THREE.MeshBasicMaterial({color:0xffffff,wireframe:true}));
+scene.add(globe);camera.position.z=3;
+(function animate(){requestAnimationFrame(animate);globe.rotation.y+=0.003;globe.rotation.x+=0.001;renderer.render(scene,camera)})();
+
+const map=L.map('map').setView([33.4895,126.4983],16);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+L.marker([33.4895,126.4983]).addTo(map).bindPopup('행사장 위치').openPopup();
+</script>
 </body>
 </html>
