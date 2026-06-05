@@ -1,112 +1,87 @@
 <!DOCTYPE html>
-<html lang="ko" class="scroll-smooth">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>제31회 환경의 날 기념행사</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        body { font-family: 'Noto Sans KR', sans-serif; }
-        .modal { display: none; position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; padding: 20px; }
-        .modal.active { display: flex; }
-        .modal-content { max-height: 85vh; overflow-y: auto; }
-        #map { height: 300px; width: 100%; border-radius: 0.5rem; }
+        body { font-family: 'Noto Sans KR', sans-serif; overflow-x: hidden; }
+        
+        /* 종이비행기 애니메이션 (CSS 기반으로 확실하게 작동) */
+        .paper-plane {
+            position: fixed;
+            top: 20%;
+            left: -100px;
+            font-size: 50px;
+            color: #16a34a;
+            z-index: 1;
+            animation: fly 10s linear infinite;
+        }
+        @keyframes fly {
+            0% { transform: translateX(0) translateY(0) rotate(0deg); }
+            50% { transform: translateX(50vw) translateY(100px) rotate(10deg); }
+            100% { transform: translateX(110vw) translateY(0) rotate(0deg); }
+        }
+
+        .modal { display: none; position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; padding: 20px; }
+        .modal.active { display: flex !important; }
+        .modal-content { background: white; padding: 2rem; border-radius: 1rem; width: 100%; max-width: 600px; max-height: 80vh; overflow-y: auto; }
+        #map { height: 250px; width: 100%; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800">
+<body class="bg-slate-50">
 
-    <!-- Navigation -->
-    <nav class="bg-white shadow-md sticky top-0 z-50">
-        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <h1 class="text-xl font-bold text-green-700 flex items-center gap-2">
-                <svg width="24" height="24" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M35 5L5 18L17 22L21 35L35 5ZM18.5 23L15.5 19.5L29 10L18.5 23Z" fill="#22C55E"/></svg>
-                제31회 환경의 날
-            </h1>
-            <ul class="flex space-x-6 text-sm font-bold">
-                <li><button onclick="openModal('modal-about')">행사 소개</button></li>
-                <li><button onclick="openModal('modal-schedule')">일정표</button></li>
-                <li><button onclick="openModal('modal-poster')">홍보물</button></li>
-                <li><button onclick="openModal('modal-location')">찾아오기</button></li>
-            </ul>
+    <div class="paper-plane">✈️</div>
+
+    <div class="relative z-10">
+        <nav class="bg-white/90 backdrop-blur shadow-sm sticky top-0 z-50">
+            <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+                <h1 class="text-xl font-bold text-green-700">제31회 환경의 날</h1>
+                <div class="space-x-4 text-sm font-bold">
+                    <button onclick="document.getElementById('modal-about').classList.add('active')">행사소개</button>
+                    <button onclick="document.getElementById('modal-schedule').classList.add('active')">일정표</button>
+                    <button onclick="document.getElementById('modal-poster').classList.add('active')">홍보물</button>
+                    <button onclick="showLocation()">찾아오기</button>
+                </div>
+            </div>
+        </nav>
+
+        <header class="bg-green-600/80 text-white py-20 text-center">
+            <h2 class="text-4xl font-bold mb-4">제31회 환경의 날 기념행사</h2>
+            <p>6월 7일 ~ 6월 8일 | 제주시민복지타운 광장</p>
+        </header>
+
+        <main class="container mx-auto px-6 py-12">
+            <div class="grid md:grid-cols-2 gap-6">
+                <button onclick="document.getElementById('modal-baekil').classList.add('active')" class="bg-white p-8 rounded-xl shadow-lg border-2 border-green-500 font-bold hover:bg-green-50">청소년 환경 백일장 신청</button>
+                <button onclick="document.getElementById('modal-dotjari').classList.add('active')" class="bg-white p-8 rounded-xl shadow-lg border-2 border-green-500 font-bold hover:bg-green-50">어린이 돗자리장 예약</button>
+            </div>
+        </main>
+    </div>
+
+    <div id="modal-about" class="modal"><div class="modal-content">
+        <h2 class="text-xl font-bold mb-4 text-green-700">행사 소개</h2>
+        <div class="text-sm text-slate-700 space-y-4">
+            <p>❑ 올해 행사는 <strong>‘맨날맨날 기후행동, 우리 모두 ᄀᆞ치허게!’</strong>를 주제로 일상 속 작은 실천으로 기후위기에 대응하며 지속 가능한 미래를 함께 만들자는 뜻을 담았습니다.</p>
+            <p>❍ 세계 환경의 날 주제인 ‘기후행동을 향한 전 세계의 요청’에 맞춰 생활 속 기후행동과 자원순환 실천, 녹색소비 확산을 위한 체험 프로그램을 운영합니다.</p>
+            <p>❍ 행사는 제주도와 제주도지속가능발전협의회가 공동 주최하며, 청소년 환경 백일장과 31개 환경 체험·전시 부스가 운영됩니다.</p>
         </div>
-    </nav>
-
-    <!-- Hero Section -->
-    <section class="bg-green-600 text-white py-24 text-center">
-        <h2 class="text-4xl md:text-5xl font-bold mb-4">제31회 환경의 날 기념행사</h2>
-        <p class="text-xl">6월 7일 ~ 6월 8일 | 제주시민복지타운 광장</p>
-    </section>
-
-    <!-- Registration -->
-    <section id="register" class="container mx-auto px-6 py-12">
-        <h2 class="text-2xl font-bold mb-6 border-l-4 border-green-600 pl-4">접수하기</h2>
-        <div class="grid md:grid-cols-2 gap-6">
-            <button onclick="openModal('modal-baekil')" class="bg-green-700 text-white p-6 rounded-xl font-bold hover:bg-green-800">청소년 환경 백일장 신청</button>
-            <button onclick="openModal('modal-dotjari')" class="bg-green-700 text-white p-6 rounded-xl font-bold hover:bg-green-800">어린이 돗자리장 예약</button>
-        </div>
-    </section>
-
-    <!-- Modals -->
-    <!-- 1. 행사 소개 -->
-    <div id="modal-about" class="modal" onclick="closeModal('modal-about')"><div class="bg-white p-8 rounded-2xl w-full max-w-2xl modal-content" onclick="event.stopPropagation()">
-        <div class="flex justify-between items-center mb-6"><h2 class="text-2xl font-bold text-green-700">행사 소개</h2><button onclick="closeModal('modal-about')" class="text-3xl">&times;</button></div>
-        <div class="space-y-4 text-sm text-slate-700 leading-relaxed">
-            <p><strong>❑ 주제:</strong> ‘맨날맨날 기후행동, 우리 모두 ᄀᆞ치허게!’ - 일상 속 작은 실천으로 지속 가능한 미래를 만듭니다.</p>
-            <p><strong>❍ 내용:</strong> 세계 환경의 날 주제인 ‘기후행동을 향한 전 세계의 요청’에 맞춰 자원순환, 녹색소비 확산을 위한 체험 운영.</p>
-            <p><strong>❍ 주최/주관:</strong> 제주도, 제주도지속가능발전협의회 공동 주최 및 유관기관 공동 주관.</p>
-            <p><strong>❑ 프로그램:</strong> 11시 환경 한마당(백일장, 체험부스), 14시 기념식(시민복지타운 야외공연장).</p>
-            <p><strong>❑ 챌린지:</strong> 6/7~6/30, 생활 속 기후행동 실천 인증 챌린지 운영.</p>
-        </div>
-        <button onclick="closeModal('modal-about')" class="mt-6 w-full bg-slate-800 text-white py-3 rounded-lg">닫기</button>
+        <button onclick="this.parentElement.parentElement.classList.remove('active')" class="mt-4 w-full bg-slate-800 text-white py-2 rounded">닫기</button>
     </div></div>
 
-    <!-- 2. 일정표 -->
-    <div id="modal-schedule" class="modal" onclick="closeModal('modal-schedule')"><div class="bg-white p-6 rounded-2xl w-full max-w-2xl modal-content" onclick="event.stopPropagation()">
-        <div class="flex justify-between items-center mb-4"><h2 class="text-xl font-bold">행사 일정표</h2><button onclick="closeModal('modal-schedule')" class="text-2xl">&times;</button></div>
-        <img src="https://la21jeju.or.kr/data/cheditor4/2605/20260520191507_hcrwlyqn.jpg" alt="일정표" class="w-full">
-    </div></div>
-
-    <!-- 3. 홍보물 -->
-    <div id="modal-poster" class="modal" onclick="closeModal('modal-poster')"><div class="bg-white p-6 rounded-2xl w-full max-w-lg modal-content" onclick="event.stopPropagation()">
-        <div class="flex justify-between items-center mb-4"><h2 class="text-xl font-bold">홍보 포스터</h2><button onclick="closeModal('modal-poster')" class="text-2xl">&times;</button></div>
-        <img src="https://www.jeju.go.kr/files/board/f223c8c6-8a3e-4cfe-9fb3-052534b306b9.jpg" alt="홍보포스터" class="w-full">
-    </div></div>
-
-    <!-- 4. 찾아오기 -->
-    <div id="modal-location" class="modal" onclick="closeModal('modal-location')"><div class="bg-white p-8 rounded-2xl w-full max-w-2xl modal-content" onclick="event.stopPropagation()">
-        <div class="flex justify-between items-center mb-4"><h2 class="text-xl font-bold">찾아오기</h2><button onclick="closeModal('modal-location')" class="text-2xl">&times;</button></div>
-        <div id="map" class="mb-4"></div>
-        <div class="text-sm space-y-2">
-            <p><strong>🚗 자가용:</strong> 내비게이션 "제주시 연삼로 286" 또는 "제주특별자치도 경제통상진흥원" 검색.</p>
-            <p><strong>🚌 대중교통:</strong> 제주도청, 연동주민센터, 경제통상진흥원 인근 하차 후 도보 3~5분.</p>
-            <p><strong>🚶 도보:</strong> 제주도청 기준 도보 5분, 행사장 안내 현수막 참조.</p>
-        </div>
-    </div></div>
-
-    <!-- 5. 백일장 신청 -->
-    <div id="modal-baekil" class="modal" onclick="closeModal('modal-baekil')"><div class="bg-white p-8 rounded-2xl w-full max-w-md modal-content" onclick="event.stopPropagation()">
-        <div class="flex justify-between items-center mb-4"><h2 class="text-xl font-bold">백일장 신청서</h2><button onclick="closeModal('modal-baekil')" class="text-2xl">&times;</button></div>
-        <input class="w-full border p-3 mb-3 rounded" placeholder="이름">
-        <input class="w-full border p-3 mb-4 rounded" placeholder="학교/학년/연락처">
-        <button onclick="closeModal('modal-baekil')" class="w-full bg-green-600 text-white py-3 rounded-lg">신청 완료</button>
-    </div></div>
-
-    <!-- 6. 돗자리장 예약 -->
-    <div id="modal-dotjari" class="modal" onclick="closeModal('modal-dotjari')"><div class="bg-white p-8 rounded-2xl w-full max-w-md modal-content" onclick="event.stopPropagation()">
-        <div class="flex justify-between items-center mb-4"><h2 class="text-xl font-bold">돗자리장 예약</h2><button onclick="closeModal('modal-dotjari')" class="text-2xl">&times;</button></div>
-        <input class="w-full border p-3 mb-3 rounded" placeholder="대표자 이름">
-        <input class="w-full border p-3 mb-4 rounded" placeholder="참여 인원">
-        <button onclick="closeModal('modal-dotjari')" class="w-full bg-green-600 text-white py-3 rounded-lg">예약 완료</button>
-    </div></div>
+    <div id="modal-schedule" class="modal"><div class="modal-content"><img src="https://la21jeju.or.kr/data/cheditor4/2605/20260520191507_hcrwlyqn.jpg"><button onclick="this.parentElement.parentElement.classList.remove('active')" class="mt-4 w-full bg-slate-800 text-white py-2 rounded">닫기</button></div></div>
+    <div id="modal-poster" class="modal"><div class="modal-content"><img src="https://www.jeju.go.kr/files/board/f223c8c6-8a3e-4cfe-9fb3-052534b306b9.jpg"><button onclick="this.parentElement.parentElement.classList.remove('active')" class="mt-4 w-full bg-slate-800 text-white py-2 rounded">닫기</button></div></div>
+    <div id="modal-location" class="modal"><div class="modal-content"><div id="map" class="mb-4"></div><p class="text-sm"><b>자가용:</b> 제주시 연삼로 286<br><b>대중교통:</b> 도청/진흥원 인근 하차 도보 5분</p><button onclick="this.parentElement.parentElement.classList.remove('active')" class="mt-4 w-full bg-slate-800 text-white py-2 rounded">닫기</button></div></div>
+    <div id="modal-baekil" class="modal"><div class="modal-content"><h2 class="text-xl font-bold mb-4">백일장 신청</h2><input class="w-full border p-2 mb-2" placeholder="이름"><button onclick="this.parentElement.parentElement.classList.remove('active')" class="mt-4 w-full bg-green-600 text-white py-2 rounded">제출</button></div></div>
+    <div id="modal-dotjari" class="modal"><div class="modal-content"><h2 class="text-xl font-bold mb-4">돗자리장 예약</h2><input class="w-full border p-2 mb-2" placeholder="대표자명"><button onclick="this.parentElement.parentElement.classList.remove('active')" class="mt-4 w-full bg-green-600 text-white py-2 rounded">예약</button></div></div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        function openModal(id) { document.getElementById(id).classList.add('active'); if(id === 'modal-location') setTimeout(() => map.invalidateSize(), 100); }
-        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+        function showLocation() { document.getElementById('modal-location').classList.add('active'); setTimeout(() => { map.invalidateSize(); }, 200); }
         const map = L.map('map').setView([33.4895, 126.4983], 16);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-        L.marker([33.4895, 126.4983]).addTo(map).bindPopup("시민복지타운 광장");
+        L.marker([33.4895, 126.4983]).addTo(map).bindPopup("시민복지타운");
     </script>
 </body>
 </html>
